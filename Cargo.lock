@@ -1441,6 +1441,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
 
 [[package]]
+name = "jj-prek"
+version = "0.4.14"
+dependencies = [
+ "anyhow",
+ "clap",
+ "fancy-regex",
+ "futures-util",
+ "globset",
+ "itertools",
+ "owo-colors",
+ "prek-identify",
+ "rayon",
+ "serde",
+ "thiserror",
+ "tokio",
+ "toml",
+ "tracing",
+ "tracing-subscriber",
+ "which",
+]
+
+[[package]]
 name = "jni"
 version = "0.22.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
