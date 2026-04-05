@@ -403,6 +403,90 @@ prek is pretty new, but it is already being used or recommend by some projects a
 
 <!-- --8<-- [end: why] -->
 
+## jj-prek: Pre-commit hooks for Jujutsu (jj)
+
+This fork includes **jj-prek**, a companion binary that brings prek's hook model to [Jujutsu (jj)](https://github.com/jj-vcs/jj) workspaces — with zero git dependency.
+
+### Why jj-prek?
+
+jj is a modern VCS that doesn't use `.git/hooks`. Traditional pre-commit tools can't work without a git directory. jj-prek solves this by talking directly to `jj`:
+
+| prek (git) | jj-prek |
+|---|---|
+| `git diff --staged` | `jj diff --summary` (working copy IS the change) |
+| `git ls-files` | `jj file list` |
+| `.git/hooks/` installation | `.jj/hooks/` + standalone CLI |
+| Git refs for revision ranges | jj revset language (`@`, `@-`, etc.) |
+
+### Quick start
+
+```bash
+# Build from the workspace
+cargo install --path crates/jj-prek
+
+# Initialize a config in your jj workspace
+jj-prek init
+
+# Run hooks on working copy changes
+jj-prek
+
+# Run hooks on all tracked files
+jj-prek --all-files
+
+# Install hook script into .jj/hooks/
+jj-prek install
+```
+
+### Configuration
+
+jj-prek uses the same TOML config format as prek. Create a `jj-prek.toml` (or `prek.toml`) in your workspace root:
+
+```toml
+[[repos]]
+repo = "local"
+
+[[repos.hooks]]
+id = "cargo-fmt"
+name = "cargo fmt"
+entry = "cargo fmt -- --check"
+language = "system"
+pass_filenames = false
+types_or = ["rust"]
+
+[[repos.hooks]]
+id = "cargo-clippy"
+name = "cargo clippy"
+entry = "cargo clippy --all-targets -- -D warnings"
+language = "system"
+pass_filenames = false
+types_or = ["rust"]
+priority = 10
+```
+
+### Commands
+
+```
+jj-prek                      # Run hooks (default: working copy changes)
+jj-prek run --all-files      # Run on all tracked files
+jj-prek run --last-change    # Run on files from @-
+jj-prek run --from-ref @--   # Run on changes from a revset
+jj-prek run -H cargo-fmt     # Run only specific hooks
+jj-prek run --skip clippy    # Skip specific hooks
+jj-prek install              # Install hook to .jj/hooks/
+jj-prek uninstall            # Remove installed hook
+jj-prek list                 # List configured hooks
+jj-prek init                 # Create jj-prek.toml template
+jj-prek validate-config      # Validate config file
+```
+
+### Features
+
+- **Same config format** as prek — `types_or`, `files`, `exclude`, `args`, `priority`, `pass_filenames`, etc.
+- **Real file identification** via `prek-identify` — shebangs, binary detection, 300+ type tags
+- **Parallel execution** within priority groups
+- **Revset support** — use jj's revision language for `--from-ref`/`--to-ref`
+- **`JJ_PREK_SKIP` env var** — skip hooks by ID (comma-separated)
+
 ## Acknowledgements
 
 This project is heavily inspired by the original [pre-commit](https://pre-commit.com/) tool, and it wouldn't be possible without the hard work
